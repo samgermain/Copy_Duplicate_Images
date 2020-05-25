@@ -47,8 +47,17 @@ Searches a directory recursively to see if said directory contains duplicate ima
 '''
 def find_similar_images(querydir, searchdir, outdir, hashfunc = imagehash.average_hash):
     
+    def createOutDir(direc):                
+        subDirs = [os.path.join(direc, path) for path in os.listdir(direc) if os.path.isdir('./' + direc + '/' + path)]
+        for subDir in subDirs:
+            createOutDir(subDir)
+            dirPath = './' + outdir + '/' + os.path.relpath(subDir, querydir)
+            if not os.path.exists(dirPath):
+                os.makedirs(dirPath)
+
     if not os.path.exists(outdir):
         os.makedirs(outdir)
+    createOutDir(querydir)
 
     #Returns the hash for an image, or False if there's a problem generating the hash
     def get_hash(img):
@@ -75,10 +84,11 @@ def find_similar_images(querydir, searchdir, outdir, hashfunc = imagehash.averag
             print('Duplicate of ', images[hash], 'found at ', img)
             images[hash] = images.get(hash, []) + [img]
             cnt = 1
-            cpyFileName = outdir + '/' +  os.path.basename(img)
+            cpyFileName = outdir + '/' +  os.path.relpath(images[hash][0], querydir)
+            pth, extension = os.path.splitext(cpyFileName)
             while (os.path.exists(cpyFileName)):
                 cnt += 1
-                cpyFileName = outdir + '/' + str(cnt) + '_' + os.path.basename(img)
+                cpyFileName = pth + '_' + str(cnt) + extension
             copyfile(img, cpyFileName)
 
 
