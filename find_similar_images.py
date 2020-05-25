@@ -24,8 +24,9 @@ Recursively searches a directory to find all the image files
 '''
 def imagesInDir(direc, skip = []):
     imagePaths = []
-    subDirs = [os.path.join(direc, path) for path in os.listdir(direc) if os.path.isdir(path)]
+    subDirs = [os.path.join(direc, path) for path in os.listdir(direc) if os.path.isdir(direc + '/' + path)]
     for subDir in subDirs:
+#        print(subDir)
         if subDir in skip:
             continue
         imagePaths = imagePaths + imagesInDir(subDir)
@@ -58,8 +59,8 @@ def find_similar_images(querydir, searchdir, outdir, hashfunc = imagehash.averag
             return False
 
     #Finds the names of all image files that will be searched for duplicates, not the query images
-    query_image_filenames = imagesInDir(querydir)
-    search_image_filenames = imagesInDir(searchdir, ['./' + querydir, './' + outdir])
+    query_image_filenames = imagesInDir(querydir, ['./.git'])
+    search_image_filenames = imagesInDir(searchdir, ['./.git', './' + querydir, './' + outdir])
 
     images = {} #The query images
     for img in query_image_filenames:
@@ -79,5 +80,7 @@ def find_similar_images(querydir, searchdir, outdir, hashfunc = imagehash.averag
                 cnt += 1
                 cpyFileName = outdir + '/' + str(cnt) + '_' + os.path.basename(img)
             copyfile(img, cpyFileName)
+
+
 
 find_similar_images('QueryDir', '.', 'OutDir', imagehash.phash)
